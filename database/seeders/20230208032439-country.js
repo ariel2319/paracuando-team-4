@@ -13,7 +13,7 @@ module.exports = {
       await queryInterface.bulkInsert('countries', [
         {
           id: '1',
-          name: 'México',
+          name: 'Argentina',
           created_at: new Date(),
           updated_at: new Date()
         }
@@ -31,7 +31,7 @@ module.exports = {
     try {
       await queryInterface.bulkDelete('countries', {
         name: {
-          [Op.or]: ['México']
+          [Op.or]: ['Argentina']
         }
       }, { transaction })
       await transaction.commit()
