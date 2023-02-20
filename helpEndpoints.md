@@ -1,3 +1,7 @@
+We can send parameter between middleware and function with add property to request. 
+like request.xxxx=var
+Then in the other function we can read this request.xxx value
+
 - listado de endpoints tipo table
 
 ## Endpoints
