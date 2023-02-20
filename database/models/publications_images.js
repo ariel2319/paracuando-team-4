@@ -29,9 +29,9 @@ module.exports = (sequelize, DataTypes) => {
       scopes: {
         view_public: { attributes: ['id','image_url' ,'order', 'publication_id'] },
       },
-      no_timestamps: {
-        attributes: { exclude: ['created_at', 'updated_at'] },
-      },
+      // no_timestamps: {
+      //   attributes: { exclude: ['created_at', 'updated_at'] },
+      // },
     },
   )
   return PublicationsImages

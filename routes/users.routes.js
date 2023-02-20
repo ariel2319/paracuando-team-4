@@ -8,6 +8,8 @@ const {
   getUserById,
   putUserById,
   getVotesById,
+  getPublicationsByUserId,
+  addInterestByTagId,
 } = require('../controllers/user.controller')
 const {
   isAnyRoleByList,
@@ -23,5 +25,11 @@ router.put('/:id', isTheSameUser, putUserById)
 router.post('/', isAdminRole, addUser)
 router.delete('/:id', removeUser)
 router.get('/:id/votes', isLogged,getVotesById)
+router.get('/:id/publications', isLogged,getPublicationsByUserId)
+router.post('/:id/add-interest', isTheSameUser,addInterestByTagId)
+
+
+
+
 
 module.exports = router

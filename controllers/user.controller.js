@@ -4,11 +4,13 @@ const { CustomError } = require('../utils/helpers')
 const jwt = require('jsonwebtoken')
 const sender = require('../libs/nodemailer')
 const VotesService = require('../services/votes.service')
+const PublicationsService = require('../services/publications.service')
 require('dotenv').config()
 
 const authService = new AuthService()
 const usersService = new UsersService()
 const votesService = new VotesService()
+const publicationsService = new PublicationsService()
 
 const getUserById = async (request, response, next) => {
   try {
@@ -42,18 +44,23 @@ const putUserById = async (request, response, next) => {
     const obj = {
       first_name: request.body.firstName,
       last_name: request.body.lastName,
-      email: request.body.email,
-      username: request.body.username,
-      password: request.body.password,
-      email_verified: request.body.email_verified,
-      token: request.body.token,
+      // email: request.body.email,
+      // username: request.body.username,
+      // password: request.body.password,
+      // email_verified: request.body.email_verified,
+      // token: request.body.token,
       code_phone: request.body.code_phone,
       phone: request.body.phone,
       country_id: request.body.countryId,
       image_url: request.body.image_url,
     }
-    let result = await usersService.updateUser(id, obj)
-    return response.json({ message: 'user changed', result })
+    const { isSameUserVar } = request
+    if (isSameUserVar) {
+      let result = await usersService.updateUser(id, obj)
+      return response.json({ message: 'Succes Update' })
+    } else {
+      return response.json({ message: 'Is not the same user' })
+    }
   } catch (error) {
     next(error)
   }
@@ -81,13 +88,36 @@ const removeUser = async (request, response, next) => {
 const getVotesById = async (request, response, next) => {
   try {
     const { id } = request.params
-    let votesByUser = await votesService.getVotesByUserId(id )
+    let votesByUser = await votesService.getVotesByUserId(id)
     return response.json({ results: votesByUser })
   } catch (error) {
     next(error)
   }
 }
 
+const getPublicationsByUserId = async (request, response, next) => {
+  try {
+    const { id } = request.params
+    
+    let publicationsByUser = await publicationsService.getPublicationsByUserId(
+      id,
+    )
+    return response.json({ results: publicationsByUser })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const addInterestByTagId = async (request, response, next) => {
+  try {
+    const {tag_id}=request.body
+    const{userIdVar}=request
+ let user = await usersService.getUser(id)
+    return response.json({ results: 'result' })
+  } catch (error) {
+    next(error)
+  }
+}
 
 module.exports = {
   getUsers,
@@ -96,4 +126,6 @@ module.exports = {
   addUser,
   removeUser,
   getVotesById,
+  getPublicationsByUserId,
+  addInterestByTagId,
 }

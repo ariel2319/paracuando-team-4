@@ -46,18 +46,26 @@ const isAdminOrSameUser = async (req, res, next) => {
   }
 }
 
-const isTheSameUser = (req, res, next) => {
+const isTheSameUser = async(req, res, next) => {
   try {
-    const { username } = req.body
-    const result = '1'
-    // se pide la consulta al servicio y se detecta si es admin o no .
-    // luego se hace next
-
-    if (result) {
+    const {id}=req.params
+    const resultLogin = passport.authenticate('jwt', { session: false })
+    if (!resultLogin) res.json({ messge: 'Not User in database' }) // is logged
+    
+    const { authorization } = req.headers
+    const token = authorization.replace('Bearer ', '')
+    const userFinded = await usersService.verifyUserByToken(token)
+    const userIdToCkeck = userFinded.id
+    if (userIdToCkeck === id) {
+      req.isSameUserVar = true
+      req.userIdVar = id
+      
       next()
     } else {
-      res.json({ message: 'Not Admin User' })
+      req.isSameUserVar = false
+      res.json({ message: 'Is not the Same User'})
     }
+
   } catch (error) {
     next(error)
   }

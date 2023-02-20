@@ -40,9 +40,9 @@ module.exports = (sequelize, DataTypes) => {
     scopes: {
       view_public: { attributes: ['id', 'name', 'description'] }
     },
-    no_timestamps: {
-      attributes: { exclude: ['created_at', 'updated_at'] }
-    },
+    // no_timestamps: {
+    //   attributes: { exclude: ['created_at', 'updated_at'] }
+    // },
   });
   return PublicationsTypes;
 };
