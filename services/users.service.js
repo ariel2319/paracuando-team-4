@@ -1,17 +1,19 @@
-const {v4: uuid4} = require('uuid');
+const { v4: uuid4 } = require('uuid')
 const models = require('../database/models')
 const { Op } = require('sequelize')
-const  {CustomError}  = require('../utils/helpers');
-const { hashPassword } = require('../libs/bcrypt');
+const { CustomError } = require('../utils/helpers')
+const { hashPassword } = require('../libs/bcrypt')
 
 class UsersService {
-
-  constructor() {
-  }
+  constructor() {}
 
   async findAndCount(query) {
     const options = {
-      where: {},
+      where: {
+        id:"",
+        name:"",
+      }
+     
     }
 
     const { limit, offset } = query
@@ -25,29 +27,54 @@ class UsersService {
       options.where.id = id
     }
 
-    const { name } = query
-    if (name) {
-      options.where.name = { [Op.iLike]: `%${name}%` }
+    const { first_name } = query
+    if (first_name) {
+      options.where.first_name = { [Op.iLike]: `%${first_name}%` }
     }
+
+    console.log('esta son las opcionaes', options)
 
     //Necesario para el findAndCountAll de Sequelize
     options.distinct = true
 
-    const users = await models.Users.findAndCountAll(options)
+    const users = await models.Users.findAndCountAll({
+      options, attributes:["first_name","last_name" ],
+      include: {
+        model: models.Profiles,
+        as: 'profiles',
+        attributes: ["role_id"],
+        include: { model: models.Roles, as: 'roles', attributes: ["name"] },
+      },
+    })
     return users
   }
 
   async createAuthUser(obj) {
     const transaction = await models.sequelize.transaction()
     try {
-
       obj.id = uuid4()
       obj.password = hashPassword(obj.password)
-      let newUser = await models.Users.create(obj, { transaction, fields: ['id','first_name', 'last_name', 'password', 'email', 'username'] })
-      
-      let publicRole = await models.Roles.findOne({where: {name:'public'}}, { raw: true })
+      let newUser = await models.Users.create(obj, {
+        transaction,
+        fields: [
+          'id',
+          'first_name',
+          'last_name',
+          'password',
+          'email',
+          'username',
+        ],
+      })
 
-      let newUserProfile = await models.Profiles.create({ user_id: newUser.id, role_id: publicRole.id}, {transaction})
+      let publicRole = await models.Roles.findOne(
+        { where: { name: 'public' } },
+        { raw: true },
+      )
+
+      let newUserProfile = await models.Profiles.create(
+        { user_id: newUser.id, role_id: publicRole.id },
+        { transaction },
+      )
 
       await transaction.commit()
       return newUser
@@ -56,8 +83,7 @@ class UsersService {
       throw error
     }
   }
-  
-  
+
   async getAuthUserOr404(id) {
     let user = await models.Users.scope('auth_flow').findByPk(id, { raw: true })
     if (!user) throw new CustomError('Not found User', 404, 'Not Found')
@@ -71,8 +97,8 @@ class UsersService {
   }
 
   async findUserByEmailOr404(email) {
-    if(!email) throw new CustomError('Email not given', 400, 'Bad Request')
-    let user = await models.Users.findOne({where: {email}}, { raw: true })
+    if (!email) throw new CustomError('Email not given', 400, 'Bad Request')
+    let user = await models.Users.findOne({ where: { email } }, { raw: true })
     if (!user) throw new CustomError('Not found User', 404, 'Not Found')
     return user
   }
@@ -105,7 +131,6 @@ class UsersService {
     }
   }
 
-
   async setTokenUser(id, token) {
     const transaction = await models.sequelize.transaction()
     try {
@@ -120,7 +145,6 @@ class UsersService {
     }
   }
 
-  
   async removeTokenUser(id) {
     const transaction = await models.sequelize.transaction()
     try {
@@ -133,24 +157,33 @@ class UsersService {
       throw error
     }
   }
-  
+
   async verifiedTokenUser(id, token, exp) {
     const transaction = await models.sequelize.transaction()
     try {
-
       if (!id) throw new CustomError('Not ID provided', 400, 'Bad Request')
-      if (!token) throw new CustomError('Not token provided', 400, 'Bad Request')
+      if (!token)
+        throw new CustomError('Not token provided', 400, 'Bad Request')
       if (!exp) throw new CustomError('Not exp exist', 400, 'Bad Request')
-      
 
       let user = await models.Users.findOne({
         where: {
           id,
-          token
-        }
+          token,
+        },
       })
-      if (!user) throw new CustomError('The user associated with the token was not found', 400, 'Invalid Token')
-      if (Date.now() > exp * 1000) throw new CustomError('The token has expired, the 15min limit has been exceeded', 401, 'Unauthorized')
+      if (!user)
+        throw new CustomError(
+          'The user associated with the token was not found',
+          400,
+          'Invalid Token',
+        )
+      if (Date.now() > exp * 1000)
+        throw new CustomError(
+          'The token has expired, the 15min limit has been exceeded',
+          401,
+          'Unauthorized',
+        )
       await user.update({ token: null }, { transaction })
       await transaction.commit()
       return user
@@ -166,7 +199,10 @@ class UsersService {
       if (!id) throw new CustomError('Not ID provided', 400, 'Bad Request')
       let user = await models.Users.findByPk(id)
       if (!user) throw new CustomError('Not found user', 404, 'Not Found')
-      let restoreUser = await user.update({ password: hashPassword(newPassword) }, { transaction })
+      let restoreUser = await user.update(
+        { password: hashPassword(newPassword) },
+        { transaction },
+      )
       await transaction.commit()
       return restoreUser
     } catch (error) {
@@ -174,7 +210,6 @@ class UsersService {
       throw error
     }
   }
-
 }
 
 module.exports = UsersService
