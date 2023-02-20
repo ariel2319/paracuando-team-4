@@ -1,4 +1,5 @@
 const express = require('express')
+const passport = require('passport')
 const router = express.Router()
 const {
   getUsers,
@@ -14,7 +15,7 @@ const {
   isAdminRole,
 } = require('../middlewares/auth.checkers')
 
-router.get('/', isAnyRoleByList(['admin']), getUsers)
+router.get('/',passport.authenticate('jwt', { session: false }),isAnyRoleByList(['admin']), getUsers)
 router.get('/:id', isAdminOrSameUser, getUserById)
 router.put('/:id', isTheSameUser, putUserById)
 router.post('/', isAdminRole, addUser)

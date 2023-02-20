@@ -21,7 +21,7 @@ const getUserById = async (request, response, next) => {
 
 const getUsers = async (request, response, next) => {
   try {    
-    const query=request.params
+    const query=request.query
     console.log(query)
     let user = await usersService.findAndCount(query)
     
