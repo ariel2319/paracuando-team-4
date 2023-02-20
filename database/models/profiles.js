@@ -28,9 +28,9 @@ module.exports = (sequelize, DataTypes) => {
       view_public: {
         attributes: ['id', 'user_id', 'role_id']
       },
-      no_timestamps: {
-        attributes: { exclude: ['created_at', 'updated_at'] }
-      },
+      // no_timestamps: {
+      //   attributes: { exclude: ['created_at', 'updated_at'] }
+      // },
     }
   });
   return Profiles;

@@ -20,9 +20,9 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'roles',
     underscored: true,
     timestamps: true,
-    scopes: {
-      no_timestamps: { attributes: { exclude: ['created_at', 'updated_at'] } }
-    }
+    // scopes: {
+    //   no_timestamps: { attributes: { exclude: ['created_at', 'updated_at'] } }
+    // }
   });
   return Roles;
 };
