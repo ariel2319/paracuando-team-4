@@ -5,12 +5,14 @@ const jwt = require('jsonwebtoken')
 const sender = require('../libs/nodemailer')
 const VotesService = require('../services/votes.service')
 const PublicationsService = require('../services/publications.service')
+const TagsService = require('../services/users.tags.service')
 require('dotenv').config()
 
 const authService = new AuthService()
 const usersService = new UsersService()
 const votesService = new VotesService()
 const publicationsService = new PublicationsService()
+const usersTagsService = new TagsService()
 
 const getUserById = async (request, response, next) => {
   try {
@@ -98,7 +100,7 @@ const getVotesById = async (request, response, next) => {
 const getPublicationsByUserId = async (request, response, next) => {
   try {
     const { id } = request.params
-    
+
     let publicationsByUser = await publicationsService.getPublicationsByUserId(
       id,
     )
@@ -110,10 +112,12 @@ const getPublicationsByUserId = async (request, response, next) => {
 
 const addInterestByTagId = async (request, response, next) => {
   try {
-    const {tag_id}=request.body
-    const{userIdVar}=request
- let user = await usersService.getUser(id)
-    return response.json({ results: 'result' })
+    const { tag_id } = request.body
+    const { userIdVar } = request
+    let result = await usersTagsService.addUsersTagsById(tag_id, userIdVar)
+    if (result) return response.json({ message: 'Interest Added' })
+    else return response.json({ error: 'No added interest' })
+    
   } catch (error) {
     next(error)
   }
