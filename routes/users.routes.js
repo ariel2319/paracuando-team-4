@@ -11,6 +11,7 @@ const {
   getPublicationsByUserId,
   addInterestByTagId,
   removeInterestByTagId,
+  addImageByTagId,
 } = require('../controllers/user.controller')
 const {
   isAnyRoleByList,
@@ -30,6 +31,6 @@ router.get('/:id/publications', isLogged,getPublicationsByUserId)
 router.post('/:id/add-interest', isTheSameUser,addInterestByTagId)
 router.delete('/:id/remove-interest', isTheSameUser,removeInterestByTagId)
 
-
+router.post('/:id/add-image', isAdminOrSameUser,addImageByTagId)
 
 module.exports = router

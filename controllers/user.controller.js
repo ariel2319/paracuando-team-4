@@ -5,20 +5,22 @@ const jwt = require('jsonwebtoken')
 const sender = require('../libs/nodemailer')
 const VotesService = require('../services/votes.service')
 const PublicationsService = require('../services/publications.service')
-const TagsService = require('../services/users.tags.service')
+const UsersTagsService = require('../services/users.tags.service')
+const TagsService = require('../services/tags.service')
 require('dotenv').config()
 
 const authService = new AuthService()
 const usersService = new UsersService()
 const votesService = new VotesService()
 const publicationsService = new PublicationsService()
-const usersTagsService = new TagsService()
+const usersTagsService = new UsersTagsService()
+const tagsService = new TagsService()
 
 const getUserById = async (request, response, next) => {
   try {
     const { id } = request.params
-    const { isAdminOrSameUserVar } = request
-    if (isAdminOrSameUserVar) {
+    const { isAdminUserVar, isSameUserVar } = request
+    if (isAdminUserVar) {
       let user = await usersService.getUserWithScope(id, 'view_same_user')
       return response.json({ results: user })
     } else {
@@ -117,7 +119,57 @@ const addInterestByTagId = async (request, response, next) => {
     let result = await usersTagsService.addUsersTagsById(tag_id, userIdVar)
     if (result) return response.json({ message: 'Interest Added' })
     else return response.json({ error: 'No added interest' })
-    
+  } catch (error) {
+    next(error)
+  }
+}
+
+const removeInterestByTagId = async (request, response, next) => {
+  try {
+    const { tag_id } = request.body
+    const { userIdVar } = request
+    let result = await usersTagsService.removeUsersTagsById(tag_id, userIdVar)
+    if (result) return response.json({ message: 'Interest removed' })
+    else return response.json({ error: 'No removed interest' })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const addImageByTagId = async (request, response, next) => {
+  try {
+    const { tag_id } = request.params
+    const { image_url } = request.body
+    let result = await tagsService.addImageByTagId(tag_id, image_url)
+    if (result) return response.json({ message: 'Image Added' })
+    else return response.json({ error: 'No Image Added' })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const removeImageByTagId = async (request, response, next) => {
+  try {
+    const { isSameUserVar } = request
+    const { isAdminUserVar } = request
+    const { userId } = request.params
+    const { tag_id } = request.body
+    const { image_url } = ''
+    let result = ''
+    if (isSameUserVar) {
+      //check is tag_id is for de user id.
+      const userIdInDatabase = await usersTagsService.findUsersTagsById(tag_id)
+      if (userIdInDatabase === userId)
+        result = await tagsService.removeImageByTagId(tag_id, image_url)
+      else
+        return response.json({ error: 'No permition for remove another image' })
+    }
+    if (isAdminUserVar) {
+      result = await tagsService.removeImageByTagId(tag_id, image_url)
+    }
+
+    if (result) return response.json({ message: 'Image removed' })
+    else return response.json({ message: 'Image Not removed' })
   } catch (error) {
     next(error)
   }
@@ -132,4 +184,7 @@ module.exports = {
   getVotesById,
   getPublicationsByUserId,
   addInterestByTagId,
+  removeInterestByTagId,
+  addImageByTagId,
+  removeImageByTagId,
 }

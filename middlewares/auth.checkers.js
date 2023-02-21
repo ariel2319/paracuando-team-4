@@ -27,31 +27,38 @@ const isAdminOrSameUser = async (req, res, next) => {
   try {
     const resultLogin = passport.authenticate('jwt', { session: false })
     if (!resultLogin) res.json({ messge: 'Not User in database' }) // is logged
-    let isAdminOrSameUserVar = false
+    const { id: userId } = req.params
     const { authorization } = req.headers
     const token = authorization.replace('Bearer ', '')
     const userFinded = await usersService.verifyUserByToken(token)
     const userToCkeckAdmin = userFinded.profiles[0].roles.name
-    const userToCkeckToken = userFinded.token
-    if (userToCkeckAdmin === 'admin' || userToCkeckToken === token) {
-      req.isAdminOrSameUserVar = true
+    const userToCkeckId = userFinded.id
+    if (userToCkeckAdmin === 'admin') {
+      req.isAdminUserVar = true //is Admin Or User
+      req.userIdVar=userId
       next()
     } else {
-      req.isAdminOrSameUserVar = false
-      next()
-    }
+      if (userToCkeckId === userId) {
+        req.isSameUserVar = true
+        next()
+      } else {
 
+        req.isAdminUserVar = false
+        req.isSameUserVar = false
+
+      }
+    }
   } catch (error) {
     next(error)
   }
 }
 
-const isTheSameUser = async(req, res, next) => {
+const isTheSameUser = async (req, res, next) => {
   try {
-    const {id}=req.params
+    const { id } = req.params
     const resultLogin = passport.authenticate('jwt', { session: false })
     if (!resultLogin) res.json({ messge: 'Not User in database' }) // is logged
-    
+
     const { authorization } = req.headers
     const token = authorization.replace('Bearer ', '')
     const userFinded = await usersService.verifyUserByToken(token)
@@ -59,13 +66,12 @@ const isTheSameUser = async(req, res, next) => {
     if (userIdToCkeck === id) {
       req.isSameUserVar = true
       req.userIdVar = id
-      
+
       next()
     } else {
       req.isSameUserVar = false
-      res.json({ message: 'Is not the Same User'})
+      res.json({ message: 'Is not the Same User' })
     }
-
   } catch (error) {
     next(error)
   }
