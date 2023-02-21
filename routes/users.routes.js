@@ -10,6 +10,7 @@ const {
   getVotesById,
   getPublicationsByUserId,
   addInterestByTagId,
+  removeInterestByTagId,
 } = require('../controllers/user.controller')
 const {
   isAnyRoleByList,
@@ -27,8 +28,7 @@ router.delete('/:id', removeUser)
 router.get('/:id/votes', isLogged,getVotesById)
 router.get('/:id/publications', isLogged,getPublicationsByUserId)
 router.post('/:id/add-interest', isTheSameUser,addInterestByTagId)
-
-
+router.delete('/:id/remove-interest', isTheSameUser,removeInterestByTagId)
 
 
 
