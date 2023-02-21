@@ -37,9 +37,9 @@ module.exports = (sequelize, DataTypes) => {
         view_public: {
           attributes: ['id', 'name', 'description', 'image_url'],
         },
-        no_timestamps: {
-          attributes: { exclude: ['created_at', 'updated_at'] },
-        },
+        // no_timestamps: {
+        //   attributes: { exclude: ['created_at', 'updated_at'] },
+        // },
       },
     },
   )

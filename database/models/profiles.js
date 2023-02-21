@@ -5,8 +5,8 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Profiles extends Model {
     static associate(models) {
-      Profiles.belongsTo(models.Users, { as: 'user', foreignKey: 'user_id' })
-      Profiles.belongsTo(models.Roles, { as: 'role', foreignKey: 'role_id' })
+      Profiles.belongsTo(models.Users, { as: 'users', foreignKey: 'user_id' })
+      Profiles.belongsTo(models.Roles, { as: 'roles', foreignKey: 'role_id' })
     }
   }
   Profiles.init({
@@ -28,9 +28,9 @@ module.exports = (sequelize, DataTypes) => {
       view_public: {
         attributes: ['id', 'user_id', 'role_id']
       },
-      no_timestamps: {
-        attributes: { exclude: ['created_at', 'updated_at'] }
-      },
+      // no_timestamps: {
+      //   attributes: { exclude: ['created_at', 'updated_at'] }
+      // },
     }
   });
   return Profiles;
